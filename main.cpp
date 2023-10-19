@@ -2,26 +2,33 @@
 
 typedef unsigned long long  U64;
 
-#define getBit(bitboard, square) (bitboard & (1ULL << square))  //get used bit
+#define getBit(bitboard, square) (bitboard & (1ULL << square))  //check if this bit is used
 #define setBit(bitboard, square) (bitboard |= (1ULL << square))  //set bit in square
 #define removeBit(bitboard, square) (getBit(bitboard, square) ? bitboard ^= (1ULL << square) : 0)  //remove bit
 
+const U64 notAfile = 18374403900871474942ULL;
+const U64 notHfile = 9187201950435737471ULL;
+const U64 notGHfile = 4557430888798830399ULL;
+const U64 notABfile = 18229723555195321596ULL;
+
 enum Board
 {
-	a8, b8, c8, d8, e8, f8, g8, h8,
-	a7, b7, c7, d7, e7, f7, g7, h7,
-	a6, b6, c6, d6, e6, f6, g6, h6,
-	a5, b5, c5, d5, e5, f5, g5, h5,
-	a4, b4, c4, d4, e4, f4, g4, h4,
-	a3, b3, c3, d3, e3, f3, g3, h3,
+	a1, b1, c1, d1, e1, f1, g1, h1,
 	a2, b2, c2, d2, e2, f2, g2, h2,
-	a1, b1, c1, d1, e1, f1, g1, h1
+	a3, b3, c3, d3, e3, f3, g3, h3,
+	a4, b4, c4, d4, e4, f4, g4, h4,
+	a5, b5, c5, d5, e5, f5, g5, h5,
+	a6, b6, c6, d6, e6, f6, g6, h6,
+	a7, b7, c7, d7, e7, f7, g7, h7,
+	a8, b8, c8, d8, e8, f8, g8, h8
 };
 
 enum Side { white, black };
 
-void printBinary(U64 number) {
+void printBinary(U64 number) 
+{
 	int numBits = sizeof(U64) * 8; // Определение количества битов в числе
+
 	for (int i = numBits - 1; i >= 0; i--) 
 	{
 		bool bit = (number >> i) & 1; // Проверка i-го бита
@@ -32,7 +39,7 @@ void printBinary(U64 number) {
 
 void PrintBitboard(U64 bitboard)
 {
-	for (int rank = 0; rank < 8; rank++) 
+	for (int rank = 7; rank >= 0; rank--) 
 	{
 		for (int file = 0; file < 8; file++) 
 		{		
@@ -41,7 +48,7 @@ void PrintBitboard(U64 bitboard)
 
 			if (!file)
 			{
-				std::cout << (8 - rank) << "  ";
+				std::cout << rank + 1 << "  ";
 			}
 
 			std::cout << (getBit(bitboard, square) ? 1 : 0) << " ";
@@ -54,45 +61,54 @@ void PrintBitboard(U64 bitboard)
 	std::cout << "\n";
 }
 
-void PrintBitboard2(U64 bitboard)
+//pawn attacks table
+
+U64 pawnAttacks[2][64];
+
+U64 PawnAttackMask(int Side, int square)
 {
-	for (int rank = 7; rank >= 0; rank--)
+	U64 attacks = 0ULL;
+	U64 bitboard = 0ULL;
+
+	setBit(bitboard, square);
+
+	if (!Side) //if white
 	{
-		for (int file = 0; file < 8; file++)
-		{
-			// Convert rank & file into square index
-			int square = rank * 8 + file;
-
-			if (file == 0)
-			{
-				std::cout << (rank + 1) << "  ";
-			}
-
-			std::cout << (getBit(bitboard, square) ? 1 : 0) << " ";
-		}
-		std::cout << std::endl;
+		if ((bitboard << 7) & notHfile)
+			attacks |= (bitboard << 7);
+		if ((bitboard << 9) & notAfile)
+			attacks |= (bitboard << 9);
 	}
-	std::cout << "   a b c d e f g h\n";
+	else //if black
+	{
+		if ((bitboard >> 7) & notAfile)
+			attacks |= (bitboard >> 7);
+		if ((bitboard >> 9) & notHfile)
+			attacks |= (bitboard >> 9);
+	}
 
-	std::cout << "Bitboard: " << bitboard;
+	return attacks;
+};
+
+void InitPawnAttacks()
+{
+	for (int square = 0; square < 64; square++)
+	{
+		pawnAttacks[white][square] = PawnAttackMask(white, square);
+		pawnAttacks[black][square] = PawnAttackMask(black, square);
+	}
 }
-
 
 int main()
 {
 	U64 bitboard = 0ULL;
+	InitPawnAttacks();
+	/*bitboard = PawnAttackMask(white, c1);
+	PrintBitboard(bitboard);*/
 
-	setBit(bitboard, a8);
-	setBit(bitboard, g3);
-
-	PrintBitboard(bitboard);
-
-
-	removeBit(bitboard, a7);
-	PrintBitboard(bitboard);
-
-	std::cout << (getBit(bitboard, g4) ? 1 : 0);
-
-
-	bitboard ^= (1ULL << a7);
+	for (int square = 0; square < 64; square++)
+	{
+		PrintBitboard(pawnAttacks[black][square]);
+	}
+	
 }
