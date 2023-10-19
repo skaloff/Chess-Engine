@@ -27,11 +27,11 @@ enum Side { white, black };
 
 void printBinary(U64 number) 
 {
-	int numBits = sizeof(U64) * 8; // Определение количества битов в числе
+	int numBits = sizeof(U64) * 8;
 
 	for (int i = numBits - 1; i >= 0; i--) 
 	{
-		bool bit = (number >> i) & 1; // Проверка i-го бита
+		bool bit = (number >> i) & 1;
 		std::cout << bit;
 	}
 	std::cout << std::endl;
@@ -64,6 +64,7 @@ void PrintBitboard(U64 bitboard)
 //pawn attacks table
 
 U64 pawnAttacks[2][64];
+U64 knightAttacks[64];
 
 U64 PawnAttackMask(int Side, int square)
 {
@@ -90,6 +91,33 @@ U64 PawnAttackMask(int Side, int square)
 	return attacks;
 };
 
+U64 KnightAttackMask(int square)
+{
+	U64 bitboard = 0ULL;
+	U64 attacks = 0ULL;
+
+	setBit(bitboard, square);
+
+	if ((bitboard << 6) & notGHfile)
+		attacks |= (bitboard << 6);
+	if ((bitboard << 10) & notABfile)
+		attacks |= (bitboard << 10);
+	if ((bitboard << 15) & notHfile)
+		attacks |= (bitboard << 15);
+	if ((bitboard << 17) & notAfile)
+		attacks |= (bitboard << 17);
+	if ((bitboard >> 6) & notABfile)
+		attacks |= (bitboard >> 6);
+	if ((bitboard >> 10) & notGHfile)
+		attacks |= (bitboard >> 10);
+	if ((bitboard >> 15) & notAfile)
+		attacks |= (bitboard >> 15);
+	if ((bitboard >> 17) & notHfile)
+		attacks |= (bitboard >> 17);
+
+	return attacks;
+}
+
 void InitPawnAttacks()
 {
 	for (int square = 0; square < 64; square++)
@@ -99,16 +127,27 @@ void InitPawnAttacks()
 	}
 }
 
+void InitKnightAttacks()
+{
+	for (int square = 0; square < 64; square++)
+	{
+		knightAttacks[square] = KnightAttackMask(square);
+	}
+}
+
 int main()
 {
 	U64 bitboard = 0ULL;
 	InitPawnAttacks();
+	InitKnightAttacks();
 	/*bitboard = PawnAttackMask(white, c1);
 	PrintBitboard(bitboard);*/
 
+	bitboard = KnightAttackMask(b4);
+
 	for (int square = 0; square < 64; square++)
 	{
-		PrintBitboard(pawnAttacks[black][square]);
+		PrintBitboard(knightAttacks[square]);
 	}
-	
+
 }
