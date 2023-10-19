@@ -11,16 +11,20 @@ const U64 notHfile = 9187201950435737471ULL;
 const U64 notGHfile = 4557430888798830399ULL;
 const U64 notABfile = 18229723555195321596ULL;
 
+U64 pawnAttacks[2][64];
+U64 knightAttacks[64];
+U64 kingAttacks[64];
+
 enum Board
 {
-	a1, b1, c1, d1, e1, f1, g1, h1,
-	a2, b2, c2, d2, e2, f2, g2, h2,
-	a3, b3, c3, d3, e3, f3, g3, h3,
-	a4, b4, c4, d4, e4, f4, g4, h4,
-	a5, b5, c5, d5, e5, f5, g5, h5,
-	a6, b6, c6, d6, e6, f6, g6, h6,
+	a8, b8, c8, d8, e8, f8, g8, h8,
 	a7, b7, c7, d7, e7, f7, g7, h7,
-	a8, b8, c8, d8, e8, f8, g8, h8
+	a6, b6, c6, d6, e6, f6, g6, h6,
+	a5, b5, c5, d5, e5, f5, g5, h5,
+	a4, b4, c4, d4, e4, f4, g4, h4,
+	a3, b3, c3, d3, e3, f3, g3, h3,
+	a2, b2, c2, d2, e2, f2, g2, h2,
+	a1, b1, c1, d1, e1, f1, g1, h1
 };
 
 enum Side { white, black };
@@ -39,7 +43,7 @@ void printBinary(U64 number)
 
 void PrintBitboard(U64 bitboard)
 {
-	for (int rank = 7; rank >= 0; rank--) 
+	for (int rank = 0; rank < 8; rank++) 
 	{
 		for (int file = 0; file < 8; file++) 
 		{		
@@ -48,7 +52,7 @@ void PrintBitboard(U64 bitboard)
 
 			if (!file)
 			{
-				std::cout << rank + 1 << "  ";
+				std::cout << (8 - rank) << "  ";
 			}
 
 			std::cout << (getBit(bitboard, square) ? 1 : 0) << " ";
@@ -60,11 +64,6 @@ void PrintBitboard(U64 bitboard)
 	std::cout << "\n   Bitboard: " << (bitboard);
 	std::cout << "\n";
 }
-
-//pawn attacks table
-
-U64 pawnAttacks[2][64];
-U64 knightAttacks[64];
 
 U64 PawnAttackMask(int Side, int square)
 {
@@ -118,6 +117,31 @@ U64 KnightAttackMask(int square)
 	return attacks;
 }
 
+U64 KingAttackMask(int square)
+{
+	U64 bitboard = 0ULL;
+	U64 attacks = 0ULL;
+
+	setBit(bitboard, square);
+
+	if ((bitboard << 1) & notAfile)
+		attacks |= (bitboard << 1);
+	if ((bitboard << 7) & notHfile)
+		attacks |= (bitboard << 7);
+	attacks |= (bitboard << 8);
+	if ((bitboard << 9) & notAfile)
+		attacks |= (bitboard << 9);
+	if ((bitboard >> 1) & notHfile)
+		attacks |= (bitboard >> 1);
+	if ((bitboard >> 7) & notAfile)
+		attacks |= (bitboard >> 7);
+	attacks |= (bitboard >> 8);
+	if ((bitboard >> 9) & notHfile)
+		attacks |= (bitboard >> 9);
+
+	return attacks;
+}
+
 void InitPawnAttacks()
 {
 	for (int square = 0; square < 64; square++)
@@ -135,19 +159,27 @@ void InitKnightAttacks()
 	}
 }
 
+void InitKingAttacks()
+{
+	for (int square = 0; square < 64; square++)
+	{
+		kingAttacks[square] = KingAttackMask(square);
+	}
+}
+
 int main()
 {
 	U64 bitboard = 0ULL;
 	InitPawnAttacks();
 	InitKnightAttacks();
+	InitKingAttacks();
 	/*bitboard = PawnAttackMask(white, c1);
 	PrintBitboard(bitboard);*/
 
-	bitboard = KnightAttackMask(b4);
 
 	for (int square = 0; square < 64; square++)
 	{
-		PrintBitboard(knightAttacks[square]);
+		PrintBitboard(kingAttacks[square]);
 	}
 
 }
