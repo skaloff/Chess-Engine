@@ -14,6 +14,7 @@ const U64 notABfile = 18229723555195321596ULL;
 U64 pawnAttacks[2][64];
 U64 knightAttacks[64];
 U64 kingAttacks[64];
+U64 bishopAttacks[64];
 
 enum Board
 {
@@ -142,6 +143,27 @@ U64 KingAttackMask(int square)
 	return attacks;
 }
 
+U64 BishopAttackMask(int square) 
+{
+	U64 attacks = 0ULL;
+
+	int r, f;
+
+	int tr = square / 8;
+	int tf = square % 8;
+
+	for (r = tr + 1, f = tf + 1; r < 7 && f < 7; r++, f++)
+		attacks |= (1ULL << r * 8 + f);
+	for (r = tr - 1, f = tf - 1; r > 0 && f > 0; r--, f--)
+		attacks |= (1ULL << r * 8 + f);
+	for (r = tr + 1, f = tf - 1; r < 7 && f > 0; r++, f--)
+		attacks |= (1ULL << r * 8 + f);
+	for (r = tr - 1, f = tf + 1; r > 0 && f < 7; r--, f++)
+		attacks |= (1ULL << r * 8 + f);
+	
+	return attacks;
+}
+
 void InitPawnAttacks()
 {
 	for (int square = 0; square < 64; square++)
@@ -167,19 +189,29 @@ void InitKingAttacks()
 	}
 }
 
+void InitBishopAttacks()
+{
+	for (int square = 0; square < 64; square++)
+	{
+		bishopAttacks[square] = BishopAttackMask(square);
+	}
+}
+
 int main()
 {
 	U64 bitboard = 0ULL;
 	InitPawnAttacks();
 	InitKnightAttacks();
 	InitKingAttacks();
-	/*bitboard = PawnAttackMask(white, c1);
-	PrintBitboard(bitboard);*/
+	InitBishopAttacks();
+
+	bitboard = BishopAttackMask(d5);
+	PrintBitboard(bitboard);
 
 
-	for (int square = 0; square < 64; square++)
+    for (int square = 0; square < 64; square++)
 	{
-		PrintBitboard(kingAttacks[square]);
+		PrintBitboard(bishopAttacks[square]);
 	}
 
 }
