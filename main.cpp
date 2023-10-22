@@ -15,6 +15,7 @@ U64 pawnAttacks[2][64];
 U64 knightAttacks[64];
 U64 kingAttacks[64];
 U64 bishopAttacks[64];
+U64 rookAttacks[64];
 
 enum Board
 {
@@ -66,7 +67,7 @@ void PrintBitboard(U64 bitboard)
 	std::cout << "\n";
 }
 
-U64 PawnAttackMask(int Side, int square)
+U64 pawnAttackMask(int Side, int square)
 {
 	U64 attacks = 0ULL;
 	U64 bitboard = 0ULL;
@@ -91,7 +92,7 @@ U64 PawnAttackMask(int Side, int square)
 	return attacks;
 };
 
-U64 KnightAttackMask(int square)
+U64 knightAttackMask(int square)
 {
 	U64 bitboard = 0ULL;
 	U64 attacks = 0ULL;
@@ -118,7 +119,7 @@ U64 KnightAttackMask(int square)
 	return attacks;
 }
 
-U64 KingAttackMask(int square)
+U64 kingAttackMask(int square)
 {
 	U64 bitboard = 0ULL;
 	U64 attacks = 0ULL;
@@ -143,7 +144,7 @@ U64 KingAttackMask(int square)
 	return attacks;
 }
 
-U64 BishopAttackMask(int square) 
+U64 bishopAttackMask(int square)
 {
 	U64 attacks = 0ULL;
 
@@ -153,65 +154,165 @@ U64 BishopAttackMask(int square)
 	int tf = square % 8;
 
 	for (r = tr + 1, f = tf + 1; r < 7 && f < 7; r++, f++)
-		attacks |= (1ULL << r * 8 + f);
+		attacks |= (1ULL << (r * 8 + f));
 	for (r = tr - 1, f = tf - 1; r > 0 && f > 0; r--, f--)
-		attacks |= (1ULL << r * 8 + f);
+		attacks |= (1ULL << (r * 8 + f));
 	for (r = tr + 1, f = tf - 1; r < 7 && f > 0; r++, f--)
-		attacks |= (1ULL << r * 8 + f);
+		attacks |= (1ULL << (r * 8 + f));
 	for (r = tr - 1, f = tf + 1; r > 0 && f < 7; r--, f++)
-		attacks |= (1ULL << r * 8 + f);
+		attacks |= (1ULL << (r * 8 + f));
 	
 	return attacks;
 }
 
-void InitPawnAttacks()
+U64 bishopAttackMaskOnTheFly(int square, U64 block)
+{
+	U64 attacks = 0ULL;
+
+	int r, f;
+
+	int tr = square / 8;
+	int tf = square % 8;
+
+	for (r = tr + 1, f = tf + 1; r <= 7 && f <= 7; r++, f++)
+	{
+		attacks |= (1ULL << (r * 8 + f));
+		if ((1ULL << (r * 8 + f)) & block) break;
+	}
+	for (r = tr - 1, f = tf - 1; r >= 0 && f >= 0; r--, f--)
+	{
+		attacks |= (1ULL << (r * 8 + f));
+		if ((1ULL << (r * 8 + f)) & block) break;
+	}
+	for (r = tr + 1, f = tf - 1; r <= 7 && f >= 0; r++, f--)
+	{
+		attacks |= (1ULL << (r * 8 + f));
+		if ((1ULL << (r * 8 + f)) & block) break;
+	}
+	for (r = tr - 1, f = tf + 1; r >= 0 && f <= 7; r--, f++)
+	{
+		attacks |= (1ULL << (r * 8 + f));
+		if ((1ULL << (r * 8 + f)) & block) break;
+	}
+
+	return attacks;
+}
+
+U64 rookAttackMask(int square)
+{
+	U64 attacks = 0ULL;
+
+	int r, f;
+
+	int tr = square / 8;
+	int tf = square % 8;
+
+	for (r = tr + 1; r <= 6; r++)
+		attacks |= (1ULL << (r * 8 + tf));
+	for (r = tr - 1; r >= 1; r--)
+		attacks |= (1ULL << (r * 8 + tf));
+	for (f = tf + 1; f <= 6; f++)
+		attacks |= (1ULL << (tr * 8 + f));
+	for (f = tf - 1; f >= 1; f--)
+		attacks |= (1ULL << (tr * 8 + f));
+
+	return attacks;
+}
+
+U64 rookAttackMaskOnTheFly(int square, U64 block)
+{
+	U64 attacks = 0ULL;
+
+	int r, f;
+
+	int tr = square / 8;
+	int tf = square % 8;
+
+	for (r = tr + 1; r <= 7; r++)
+	{
+		attacks |= (1ULL << (r * 8 + tf));
+		if ((1ULL << (r * 8 + tf)) & block) break;
+	}
+	for (r = tr - 1; r >= 0; r--)
+	{
+		attacks |= (1ULL << (r * 8 + tf));
+		if ((1ULL << (r * 8 + tf)) & block) break;
+	}
+	for (f = tf + 1; f <= 7; f++)
+	{
+		attacks |= (1ULL << (tr * 8 + f));
+		if ((1ULL << (tr * 8 + f)) & block) break;
+	}
+	for (f = tf - 1; f >= 0; f--)
+	{
+		attacks |= (1ULL << (tr * 8 + f));
+		if ((1ULL << (tr * 8 + f)) & block) break;
+	}
+	return attacks;
+}
+
+void initPawnAttacks()
 {
 	for (int square = 0; square < 64; square++)
 	{
-		pawnAttacks[white][square] = PawnAttackMask(white, square);
-		pawnAttacks[black][square] = PawnAttackMask(black, square);
+		pawnAttacks[white][square] = pawnAttackMask(white, square);
+		pawnAttacks[black][square] = pawnAttackMask(black, square);
 	}
 }
 
-void InitKnightAttacks()
+void initKnightAttacks()
 {
 	for (int square = 0; square < 64; square++)
 	{
-		knightAttacks[square] = KnightAttackMask(square);
+		knightAttacks[square] = knightAttackMask(square);
 	}
 }
 
-void InitKingAttacks()
+void initKingAttacks()
 {
 	for (int square = 0; square < 64; square++)
 	{
-		kingAttacks[square] = KingAttackMask(square);
+		kingAttacks[square] = kingAttackMask(square);
 	}
 }
 
-void InitBishopAttacks()
+void initBishopAttacks()
 {
 	for (int square = 0; square < 64; square++)
 	{
-		bishopAttacks[square] = BishopAttackMask(square);
+		bishopAttacks[square] = bishopAttackMask(square);
+	}
+}
+
+void initRookAttacks()
+{
+	for (int square = 0; square < 64; square++)
+	{
+		rookAttacks[square] = rookAttackMask(square);
 	}
 }
 
 int main()
 {
+	U64 block = 0ULL;
 	U64 bitboard = 0ULL;
-	InitPawnAttacks();
-	InitKnightAttacks();
-	InitKingAttacks();
-	InitBishopAttacks();
+	initPawnAttacks();
+	initKnightAttacks();
+	initKingAttacks();
+	initBishopAttacks();
+	initRookAttacks();
+	setBit(block, e3);
+	setBit(block, f6);
+	setBit(block, c3);
+	PrintBitboard(block);
 
-	bitboard = BishopAttackMask(d5);
+	bitboard = rookAttackMaskOnTheFly(f3, block);
 	PrintBitboard(bitboard);
 
 
-    for (int square = 0; square < 64; square++)
+    /*for (int square = 0; square < 64; square++)
 	{
-		PrintBitboard(bishopAttacks[square]);
-	}
+		PrintBitboard(rookAttacks[square]);
+	}*/
 
 }
