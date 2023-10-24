@@ -1,11 +1,13 @@
 #include <iostream>
+#include <stdlib.h>
 #include <string>
+
 
 typedef unsigned long long  U64;
 
-#define getBit(bitboard, square) (bitboard & (1ULL << square))  //check if this bit is used
-#define setBit(bitboard, square) (bitboard |= (1ULL << square))  //set bit in square
-#define removeBit(bitboard, square) (getBit(bitboard, square) ? bitboard ^= (1ULL << square) : 0)  //remove bit
+#define getBit(bitboard, square) (bitboard & (1ULL << square))  
+#define setBit(bitboard, square) (bitboard |= (1ULL << square))  
+#define removeBit(bitboard, square) (getBit(bitboard, square) ? bitboard ^= (1ULL << square) : 0)  
 
 const U64 notAfile = 18374403900871474942ULL;
 const U64 notHfile = 9187201950435737471ULL;
@@ -17,6 +19,28 @@ U64 knightAttacks[64];
 U64 kingAttacks[64];
 U64 bishopAttacks[64];
 U64 rookAttacks[64];
+
+int relevantRookBits[64] = {
+	12, 11, 11, 11, 11, 11, 11, 12, 
+	11, 10, 10, 10, 10, 10, 10, 11, 
+	11, 10, 10, 10, 10, 10, 10, 11, 
+	11, 10, 10, 10, 10, 10, 10, 11, 
+	11, 10, 10, 10, 10, 10, 10, 11, 
+	11, 10, 10, 10, 10, 10, 10, 11, 
+	11, 10, 10, 10, 10, 10, 10, 11, 
+	12, 11, 11, 11, 11, 11, 11, 12
+};
+
+int relevantBishopBits[64] = {
+	6, 5, 5, 5, 5, 5, 5, 6, 
+	5, 5, 5, 5, 5, 5, 5, 5, 
+	5, 5, 7, 7, 7, 7, 5, 5, 
+	5, 5, 7, 9, 9, 7, 5, 5, 
+	5, 5, 7, 9, 9, 7, 5, 5, 
+	5, 5, 7, 7, 7, 7, 5, 5, 
+	5, 5, 5, 5, 5, 5, 5, 5, 
+	6, 5, 5, 5, 5, 5, 5, 6
+};
 
 enum Board
 {
@@ -45,14 +69,10 @@ enum Side { white, black };
 
 void printBinary(U64 number) 
 {
-	int numBits = sizeof(U64) * 8;
-
-	for (int i = numBits - 1; i >= 0; i--) 
+	for (int i = 63; i >= 0; i--)
 	{
-		bool bit = (number >> i) & 1;
-		std::cout << bit;
+		std::cout << (getBit(number, i) ? 1 : 0);
 	}
-	std::cout << std::endl;
 }
 
 static inline int countBits(U64 bitboard) 
@@ -100,21 +120,21 @@ void PrintBitboard(U64 bitboard)
 	std::cout << "\n";
 }
 
-U64 pawnAttackMask(int Side, int square)
+U64 pawnAttackMask(int side, int square)
 {
 	U64 attacks = 0ULL;
 	U64 bitboard = 0ULL;
 
 	setBit(bitboard, square);
 
-	if (!Side) //if white
+	if (!side) 
 	{
 		if ((bitboard << 7) & notHfile)
 			attacks |= (bitboard << 7);
 		if ((bitboard << 9) & notAfile)
 			attacks |= (bitboard << 9);
 	}
-	else //if black
+	else 
 	{
 		if ((bitboard >> 7) & notAfile)
 			attacks |= (bitboard >> 7);
@@ -342,8 +362,24 @@ U64 setOccupancy(int index, int bitAmount, U64 attackMask)
 	return occupancy;
 }
 
+unsigned int state = 1804289383;
+
+unsigned int getRandomNumber()
+{		
+	unsigned int number = state; 
+
+	number ^= number << 13;
+	number ^= number >> 17;
+	number ^= number << 5;
+
+	state = number;
+
+	return state; 	
+}
+
 int main()
 {
-	U64 bitboard = 0ULL;
+	U64 bitboard = 23987619386439ULL;
 
+	printBinary(bitboard);
 }
