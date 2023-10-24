@@ -325,37 +325,25 @@ void initRookAttacks()
 	}
 }
 
+U64 setOccupancy(int index, int bitAmount, U64 attackMask) 
+{
+	U64 occupancy = 0ULL;
+
+	for (int i = 0; i < bitAmount; i++)
+	{
+		int square = getLeastSignifFirstBitIndex(attackMask);
+
+		removeBit(attackMask, square);
+
+		if(index & (1 << i))
+			occupancy |= (1ULL << square);
+	}
+
+	return occupancy;
+}
+
 int main()
 {
-	U64 block = 0ULL;
 	U64 bitboard = 0ULL;
-	initPawnAttacks();
-	initKnightAttacks();
-	initKingAttacks();
-	initBishopAttacks();
-	initRookAttacks();
-	setBit(block, e3);
-	setBit(block, f6);
-	setBit(block, c3);
-	PrintBitboard(block);
-
-	bitboard = rookAttackMaskOnTheFly(f3, block);
-	PrintBitboard(bitboard);
-
-	int count = getLeastSignifFirstBitIndex(bitboard);
-	bitboard = 0ULL;
-	setBit(bitboard, count);
-
-	PrintBitboard(bitboard);
-
-
-	std::cout << "   Bits amount: " << count << "\n   Board coordinate: " << bitToCoordinate[count] << "\n\n";
-
-	
-
-    /*for (int square = 0; square < 64; square++)
-	{
-		PrintBitboard(rookAttacks[square]);
-	}*/
 
 }
