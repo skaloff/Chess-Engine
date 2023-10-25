@@ -14,6 +14,8 @@ const U64 notHfile = 9187201950435737471ULL;
 const U64 notGHfile = 4557430888798830399ULL;
 const U64 notABfile = 18229723555195321596ULL;
 
+unsigned int random_state = 1804289383;
+
 U64 pawnAttacks[2][64];
 U64 knightAttacks[64];
 U64 kingAttacks[64];
@@ -67,7 +69,7 @@ std::string bitToCoordinate[] = {
 
 enum Side { white, black };
 
-void printBinary(U64 number) 
+void decimalToBinary(U64 number) 
 {
 	for (int i = 63; i >= 0; i--)
 	{
@@ -96,7 +98,37 @@ static inline int getLeastSignifFirstBitIndex(U64 bitboard)
 		return -1;
 }
 
-void PrintBitboard(U64 bitboard)
+unsigned int getRandomU32Number()
+{		
+	unsigned int number = random_state; 
+
+	number ^= number << 13;
+	number ^= number >> 17;
+	number ^= number << 5;
+
+	random_state = number;
+
+	return random_state; 	
+}
+
+U64 getRandomU64Number()
+{
+	U64 n1, n2, n3, n4;
+
+	n1 = (U64)(getRandomU32Number()) & 0xFFFF;
+	n2 = (U64)(getRandomU32Number()) & 0xFFFF;
+	n3 = (U64)(getRandomU32Number()) & 0xFFFF;
+	n4 = (U64)(getRandomU32Number()) & 0xFFFF;
+
+	return (n1 | (n2 << 16) | (n3 << 32) | (n4 << 48));
+}
+
+U64 generateMagicNumber()
+{
+	return getRandomU64Number() & getRandomU64Number() & getRandomU64Number();
+}
+
+void printBitboard(U64 bitboard)
 {
 	for (int rank = 0; rank < 8; rank++) 
 	{
@@ -362,24 +394,11 @@ U64 setOccupancy(int index, int bitAmount, U64 attackMask)
 	return occupancy;
 }
 
-unsigned int state = 1804289383;
-
-unsigned int getRandomNumber()
-{		
-	unsigned int number = state; 
-
-	number ^= number << 13;
-	number ^= number >> 17;
-	number ^= number << 5;
-
-	state = number;
-
-	return state; 	
-}
-
 int main()
 {
 	U64 bitboard = 23987619386439ULL;
 
-	printBinary(bitboard);
+	std::cout << std::endl;
+	printBitboard(generateMagicNumber());
+
 }
