@@ -22,6 +22,29 @@ U64 kingAttacks[64];
 U64 bishopAttacks[64];
 U64 rookAttacks[64];
 
+char asciiPieces[13] = "PNBRQKpnbrqk";
+
+int charPieces[] = {
+	['P'] = P,
+	['N'] = N,
+	['B'] = B,
+	['R'] = R,
+	['Q'] = Q,
+	['K'] = K,
+	['p'] = p,
+	['n'] = n,
+	['b'] = b,
+	['r'] = r,
+	['q'] = q,
+	['k'] = k,
+};
+
+U64 bitboards[12];
+U64 occupancies[3];
+int side;
+int enpassant = NO_SQ;
+int castle;
+
 int relevantRookBits[64] = {
 	12, 11, 11, 11, 11, 11, 11, 12, 
 	11, 10, 10, 10, 10, 10, 10, 11, 
@@ -43,6 +66,20 @@ int relevantBishopBits[64] = {
 	5, 5, 5, 5, 5, 5, 5, 5, 
 	6, 5, 5, 5, 5, 5, 5, 6
 };
+/*
+		0001 white king can castle to the king side
+		0010 white king can castle to the queen side	
+		0100 black king can castle to the king side
+		1000 black king can castle to the queen side	
+
+		1101 black king can castle both to the king and queen sides, white king can castle to the king side
+*/
+
+enum { wK = 1, wQ = 2, bK = 4, bQ = 8 };
+
+enum { P, N, B, R, Q, K, p, n, b, r, q, k };
+
+enum { rook, bishop };
 
 enum Board
 {
@@ -53,7 +90,7 @@ enum Board
 	a4, b4, c4, d4, e4, f4, g4, h4,
 	a3, b3, c3, d3, e3, f3, g3, h3,
 	a2, b2, c2, d2, e2, f2, g2, h2,
-	a1, b1, c1, d1, e1, f1, g1, h1
+	a1, b1, c1, d1, e1, f1, g1, h1, NO_SQ
 };
 
 std::string bitToCoordinate[] = {
@@ -398,7 +435,6 @@ int main()
 {
 	U64 bitboard = 23987619386439ULL;
 
-	std::cout << std::endl;
-	printBitboard(generateMagicNumber());
+	std::cout << std::endl; printBitboard(generateMagicNumber());
 
 }
