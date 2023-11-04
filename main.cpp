@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <string>
 
-
 typedef unsigned long long  U64;
 
 #define getBit(bitboard, square) (bitboard & (1ULL << square))  
@@ -68,6 +67,8 @@ std::string bitToCoordinate[] = {
 };
 
 enum Side { white, black };
+
+enum Castle { };
 
 void decimalToBinary(U64 number) 
 {
@@ -397,8 +398,5 @@ U64 setOccupancy(int index, int bitAmount, U64 attackMask)
 int main()
 {
 	U64 bitboard = 23987619386439ULL;
-
-	std::cout << std::endl;
-	printBitboard(generateMagicNumber());
 
 }
